@@ -2,20 +2,22 @@ package com.example.cfp.integration.github;
 
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.CounterService;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
@@ -23,21 +25,18 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
+@RunWith(SpringRunner.class)
+@RestClientTest(GithubClient.class)
 public class GithubClientTest {
 
+	@Autowired
 	private MockRestServiceServer mockServer;
 
+	@MockBean
 	private CounterService counterService;
 
+	@Autowired
 	private GithubClient githubClient;
-
-	@Before
-	public void setUp() {
-		RestTemplate restTemplate = new RestTemplate();
-		this.counterService = mock(CounterService.class);
-		this.mockServer = MockRestServiceServer.createServer(restTemplate);
-		this.githubClient = new GithubClient(this.counterService, restTemplate);
-	}
 
 	@Test
 	public void getRecentCommits() {

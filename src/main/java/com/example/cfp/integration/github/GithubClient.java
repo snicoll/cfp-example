@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 
 import com.example.cfp.CfpProperties;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.CounterService;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -41,15 +41,13 @@ public class GithubClient {
 
 	private final RestTemplate restTemplate;
 
-	@Autowired
 	public GithubClient(CounterService counterService,
-			CfpProperties cfpProperties) {
-		this(counterService, createRestTemplate(cfpProperties.getGithub().getToken()));
-	}
-
-	protected GithubClient(CounterService counterService, RestTemplate restTemplate) {
+			CfpProperties cfpProperties, RestTemplateBuilder restTemplateBuilder) {
 		this.counterService = counterService;
-		this.restTemplate = restTemplate;
+		this.restTemplate = restTemplateBuilder
+				.additionalInterceptors(new GithubAppTokenInterceptor(
+						cfpProperties.getGithub().getToken()))
+				.build();
 	}
 
 	@Cacheable("github.commits")
@@ -128,13 +126,6 @@ public class GithubClient {
 		}
 		return result;
 	}
-
-	private static RestTemplate createRestTemplate(String token) {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.getInterceptors().add(new GithubAppTokenInterceptor(token));
-		return restTemplate;
-	}
-
 
 	private static class GithubAppTokenInterceptor implements ClientHttpRequestInterceptor {
 
