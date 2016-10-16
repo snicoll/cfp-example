@@ -6,14 +6,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = SubmissionTest.TestApplication.class)
+@RunWith(SpringRunner.class)
+@DataJpaTest
 public class SubmissionTest {
 
 	@Autowired
@@ -43,11 +42,6 @@ public class SubmissionTest {
 		submission.setSummary("Live coding 4tw");
 		submission.setTrack(Track.SERVER_SIDE_JAVA);
 		return submission;
-	}
-
-	@SpringBootApplication
-	static class TestApplication {
-
 	}
 
 }
