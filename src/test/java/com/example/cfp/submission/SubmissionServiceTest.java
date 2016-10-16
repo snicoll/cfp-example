@@ -9,16 +9,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.orm.jpa.EntityScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = SubmissionServiceTest.TestApplication.class)
+@RunWith(SpringRunner.class)
+@DataJpaTest
+@Import(SubmissionService.class)
 public class SubmissionServiceTest {
 
 	@Autowired
@@ -41,13 +40,6 @@ public class SubmissionServiceTest {
 		List<Submission> submissions = this.submissionService.getSubmissionRepository()
 				.findBySpeakerEmail("john@example.com");
 		assertThat(submissions).hasSize(1);
-	}
-
-	@SpringBootApplication
-	@EntityScan(basePackageClasses = Submission.class)
-	@EnableJpaRepositories(basePackageClasses = Submission.class)
-	static class TestApplication {
-
 	}
 
 }
