@@ -6,9 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -25,9 +23,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RunWith(SpringRunner.class)
 @RestClientTest(GithubClient.class)
 public class GithubClientTest {
-
-	@MockBean
-	private CounterService counterService;
 
 	@Autowired
 	private GithubClient githubClient;
@@ -51,7 +46,6 @@ public class GithubClientTest {
 				"Validate callback is always invoked in DMLC#stop",
 				"2016-05-02T11:33:05Z",
 				"snicoll", "Stephane Nicoll", "https://avatars.githubusercontent.com/u/490484?v=3");
-		verify(this.counterService, times(1)).increment("cfp.github.requests");
 	}
 
 	@Test
@@ -60,7 +54,6 @@ public class GithubClientTest {
 				"github/no-commit.json");
 		List<Commit> latestCommit = this.githubClient.getRecentCommits("spring-projects", "spring-boot");
 		assertThat(latestCommit).hasSize(0);
-		verify(this.counterService, times(1)).increment("cfp.github.requests");
 	}
 
 	@Test
@@ -73,7 +66,6 @@ public class GithubClientTest {
 				"github/spring-framework-commits-no-polish.json");
 		Commit recentPolish = this.githubClient.getRecentPolishCommit("spring-projects", "spring-framework");
 		assertThat(recentPolish).isNull();
-		verify(this.counterService, times(5)).increment("cfp.github.requests");
 	}
 
 	@Test
@@ -88,7 +80,6 @@ public class GithubClientTest {
 		assertThat(recentPolish).isNotNull();
 		assertThat(recentPolish.getMessage()).isEqualTo("Polishing");
 		assertThat(recentPolish.getSha()).isEqualTo("07ea3745c49ec506e17dcb56107639cf36339d2c");
-		verify(this.counterService, times(3)).increment("cfp.github.requests");
 	}
 
 	@Test
@@ -97,7 +88,6 @@ public class GithubClientTest {
 				"github/spring-framework-commits-no-polish.json");
 		Commit recentPolish = this.githubClient.getRecentPolishCommit("spring-projects", "spring-framework");
 		assertThat(recentPolish).isNull();
-		verify(this.counterService, times(1)).increment("cfp.github.requests");
 	}
 
 	@Test

@@ -1,37 +1,28 @@
 package com.example.cfp.security;
 
-import com.example.cfp.CfpProperties;
-import com.example.cfp.domain.User;
-import com.example.cfp.domain.UserRepository;
-import com.example.cfp.integration.github.GithubClient;
-import com.example.cfp.integration.github.GithubUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @Configuration
-@EnableOAuth2Sso
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+	private final OAuth2UserService<OAuth2UserRequest, OAuth2User> cfpOAuth2UserService;
 
-	private final CfpProperties cfpProperties;
-
-	public SecurityConfig(CfpProperties cfpProperties) {
-		this.cfpProperties = cfpProperties;
+	public SecurityConfig(CfpOAuth2UserService cfpOAuth2UserService) {
+		this.cfpOAuth2UserService = cfpOAuth2UserService;
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		http.oauth2Login().userInfoEndpoint().userService(this.cfpOAuth2UserService)
+				.customUserType(CfpOAuth2User.class, "github");
 		http.authorizeRequests()
+				.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN")
 				.antMatchers("/admin/**").hasRole("ADMIN")
 				.antMatchers("/", "/news", "/login**", "/css/**", "/img/**", "/webjars/**", "/bootstrap/**").permitAll()
 				.anyRequest().authenticated()
@@ -46,37 +37,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.headers()
 				.frameOptions().sameOrigin();
 	}
-
-	@Bean
-	public AuthoritiesExtractor authoritiesExtractor() {
-		return map -> {
-			String username = (String) map.get("login");
-			if (this.cfpProperties.getSecurity().getAdmins().contains(username)) {
-				return AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER,ROLE_ADMIN");
-			}
-			else {
-				return AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
-			}
-		};
-	}
-
-	@Bean
-	public PrincipalExtractor principalExtractor(GithubClient githubClient, UserRepository userRepository) {
-		return map -> {
-			String githubLogin = (String) map.get("login");
-			User speaker = userRepository.findByGithub(githubLogin);
-			if (speaker == null) {
-				logger.info("Initialize user with githubId {}", githubLogin);
-				GithubUser user = githubClient.getUser(githubLogin);
-				speaker = new User();
-				speaker.setEmail(user.getEmail());
-				speaker.setName(user.getName());
-				speaker.setGithub(githubLogin);
-				speaker.setAvatarUrl(user.getAvatar());
-				userRepository.save(speaker);
-			}
-			return speaker;
-		};
-	}
-
+	
 }

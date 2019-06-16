@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import com.example.cfp.domain.Track;
 import com.example.cfp.domain.User;
+import com.example.cfp.security.CfpOAuth2User;
 import com.example.cfp.submission.SubmissionRequest;
 import com.example.cfp.submission.SubmissionService;
 
@@ -34,14 +35,14 @@ public class CfpController {
 
 	@RequestMapping(path = "/submit", method = RequestMethod.POST)
 	public String submit(@Valid SubmissionForm submissionForm, BindingResult bindingResult,
-			@AuthenticationPrincipal User user, RedirectAttributes attributes, Model model) {
+			@AuthenticationPrincipal CfpOAuth2User cfpUser, RedirectAttributes attributes, Model model) {
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("tracks", Track.values());
 			model.addAttribute("submissionForm", submissionForm);
 			return "submit";
 		}
 		else {
-			this.submissionService.create(createRequest(submissionForm, user));
+			this.submissionService.create(createRequest(submissionForm, cfpUser.getUser()));
 			attributes.addFlashAttribute("successMessage", "Thanks! Your talk proposal has been submitted.");
 			return "redirect:/submit";
 		}

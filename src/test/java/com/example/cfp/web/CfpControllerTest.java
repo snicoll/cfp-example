@@ -3,6 +3,7 @@ package com.example.cfp.web;
 import com.example.cfp.domain.Submission;
 import com.example.cfp.domain.Track;
 import com.example.cfp.domain.User;
+import com.example.cfp.security.CfpOAuth2UserService;
 import com.example.cfp.submission.SubmissionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = CfpController.class)
+@WithMockUser("jsmith")
 public class CfpControllerTest {
 
 	@Autowired
@@ -36,7 +38,9 @@ public class CfpControllerTest {
 	@MockBean
 	private SubmissionService submissionService;
 
-	@WithMockUser("jsmith")
+	@MockBean
+	private CfpOAuth2UserService oAuth2UserService;
+
 	@Test
 	public void submitTalk() throws Exception {
 		Authentication authentication = new TestingAuthenticationToken(

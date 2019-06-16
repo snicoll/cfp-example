@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import com.example.cfp.CfpProperties;
 
-import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +28,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -37,13 +35,10 @@ public class GithubClient {
 
 	private static final Pattern LINK_PATTERN = Pattern.compile("<(.+)>; rel=\"(.+)\"");
 
-	private final CounterService counterService;
-
 	private final RestTemplate restTemplate;
 
-	public GithubClient(CounterService counterService, RestTemplateBuilder restTemplateBuilder,
+	public GithubClient(RestTemplateBuilder restTemplateBuilder,
 			CfpProperties properties) {
-		this.counterService = counterService;
 		this.restTemplate = restTemplateBuilder.additionalCustomizers(rt ->
 				rt.getInterceptors().add(new GithubAppTokenInterceptor(properties.getGithub().getToken()))).build();
 	}
@@ -90,14 +85,7 @@ public class GithubClient {
 	}
 
 	private <T> ResponseEntity<T> invoke(RequestEntity<?> request, Class<T> type) {
-		this.counterService.increment("cfp.github.requests");
-		try {
-			return this.restTemplate.exchange(request, type);
-		}
-		catch (RestClientException ex) {
-			this.counterService.increment("cfp.github.failures");
-			throw ex;
-		}
+		return this.restTemplate.exchange(request, type);
 	}
 
 	private RequestEntity<?> createRequestEntity(String url) {
