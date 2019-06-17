@@ -1,6 +1,7 @@
 package com.example.cfp.security;
 
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,12 +24,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.customUserType(CfpOAuth2User.class, "github");
 		http.authorizeRequests()
 				.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ADMIN")
+				.requestMatchers(PathRequest.toH2Console()).hasRole("ADMIN")
 				.antMatchers("/admin/**").hasRole("ADMIN")
 				.antMatchers("/", "/news", "/login**", "/css/**", "/img/**", "/webjars/**", "/bootstrap/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
 			.csrf()
-				.ignoringAntMatchers("/admin/h2-console/*")
+				.ignoringRequestMatchers(PathRequest.toH2Console())
 				.and()
 			.logout()
 				.logoutSuccessUrl("/")
