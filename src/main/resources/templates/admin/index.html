@@ -1,9 +1,9 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layouts/main">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/main :: layout(~{::title}, ~{::#content})}">
 <head>
     <title>Admin - Submissions list</title>
 </head>
 <body>
-<div layout:fragment="content">
+<div id="content">
     <div class="container">
         <div class="page-header">
             <h2>Cfp proposals</h2>

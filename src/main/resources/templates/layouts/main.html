@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html th:fragment="layout (title, content)" xmlns:th="http://www.thymeleaf.org"
 xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8"/>
@@ -8,7 +8,7 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <meta name="description" content="Call for Papers Application"/>
     <meta name="author" content="Stephane Nicoll and Brian Clozel"/>
 
-    <title layout:title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">CfP Application</title>
+    <title th:replace="${title}">Layout Title</title>
 
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}"/>
     <link rel="stylesheet" th:href="@{/css/main.css}"/>
@@ -61,8 +61,9 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             <span th:text="${successMessage}" ></span>
         </div>
     </div>
-    <div layout:fragment="content">
+    <div th:replace="${content}">
         <h1>Example content</h1>
+        <p>Layout content</p>
     </div>
 </div>
 <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
